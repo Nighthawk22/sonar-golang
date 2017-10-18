@@ -29,10 +29,12 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.stream.Stream;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import fr.univartois.sonargo.toolkit.PathToolkit;
 import org.apache.commons.lang3.StringUtils;
 import org.sonar.api.CoreProperties;
 import org.sonar.api.batch.fs.FilePredicates;
@@ -59,26 +61,11 @@ public class CoverageSensor implements Sensor {
 		descriptor.name("Go Coverage").onlyOnFileType(InputFile.Type.MAIN).onlyOnLanguage(GoLanguage.KEY);
 	}
 
-	private List<String> getExcludedPath(SensorContext context) {
-
-		String globalExcludedPath = context.settings().getString(CoreProperties.GLOBAL_EXCLUSIONS_PROPERTY);
-
-		List<String> listExcludedPath = Arrays.asList(StringUtils.split(globalExcludedPath, ","));
-
-		return listExcludedPath;
-	}
-
-	private boolean isNotAnExcludedPath(Path p, SensorContext context) {
-		List<String> listExcludedPath = getExcludedPath(context);
-
-		for (String s : listExcludedPath) {
-			if (s.equals(p.toFile().getPath())) {
-				return false;
-			}
-		}
-		return true;
+	private String getExcludedPath(SensorContext context) {
+		return context.settings().getString(CoreProperties.PROJECT_EXCLUSIONS_PROPERTY);
 
 	}
+
 
 	public Stream<Path> createStream(SensorContext context) throws IOException {
 		final String fullPath = context.fileSystem().baseDir().getPath();
@@ -86,7 +73,7 @@ public class CoverageSensor implements Sensor {
 		return Files.walk(Paths.get(fullPath))
 				.filter(p -> !p.getParent().toString().contains(".git") && !p.getParent().toString().contains(".sonar")
 						&& !p.getParent().toString().contains(".scannerwork")
-						&& !p.getFileName().toString().startsWith(".") && isNotAnExcludedPath(p, context));
+						&& !p.getFileName().toString().startsWith(".") && !PathToolkit.isExcludedPath(p.toFile().getPath(), getExcludedPath(context)));
 
 	}
 

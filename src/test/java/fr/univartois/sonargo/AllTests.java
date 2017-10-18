@@ -21,6 +21,7 @@
  *******************************************************************************/
 package fr.univartois.sonargo;
 
+import fr.univartois.sonargo.toolkit.PathToolkitTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -38,7 +39,7 @@ import fr.univartois.sonargo.coverage.CoverageSensor;
 
 @RunWith(Suite.class)
 @SuiteClasses({ EvalTest.class, GoErrorTest.class, GoLanguageTest.class, GoQualityProfileTest.class,
-	GoLintIssueLoaderSendorTest.class, GoLintRulesDefinitionTest.class, GoPluginTest.class, GoPropertiesTest.class,
-	CoverageParser.class, CoverageSensor.class, GoLexerTest.class })
+		GoLintIssueLoaderSendorTest.class, GoLintRulesDefinitionTest.class, GoPluginTest.class, GoPropertiesTest.class,
+		CoverageParser.class, CoverageSensor.class, GoLexerTest.class, PathToolkitTest.class})
 public class AllTests {
 }

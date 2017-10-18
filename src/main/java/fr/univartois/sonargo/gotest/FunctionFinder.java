@@ -7,6 +7,9 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.stream.Stream;
 
+import fr.univartois.sonargo.coverage.AntPathMatcher;
+import fr.univartois.sonargo.toolkit.PathToolkit;
+import org.sonar.api.CoreProperties;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
@@ -20,7 +23,10 @@ public class FunctionFinder {
 
 	public FunctionFinder(SensorContext context) throws IOException {
 		this.baseDir = context.fileSystem().baseDir().getPath();
-		paths = Files.walk(Paths.get(baseDir)).filter(p -> p.toFile().getName().endsWith("_test.go"));
+		String excludedPattern = context.settings().getString(CoreProperties.PROJECT_EXCLUSIONS_PROPERTY);
+
+		paths = Files.walk(Paths.get(baseDir)).filter(p -> p.toFile().getName().endsWith("_test.go")
+				&& !PathToolkit.isExcludedPath(p.toFile().getPath(), excludedPattern));
 	}
 
 	public HashMap<String, String> searchFunction() {
@@ -56,12 +62,12 @@ public class FunctionFinder {
 		int indexBrace = s.indexOf('{');
 
 		if (indexTesting == -1) {
-			LOGGER.warn("This function name is not correct: " + s);
+			LOGGER.debug("This function name is not correct: " + s);
 			return null;
 		}
 		int indexParen = s.indexOf("(", indexTesting);
 		if (indexParen == -1) {
-			LOGGER.warn("This function name is not correct: " + s);
+			LOGGER.debug("This function name is not correct: " + s);
 			return null;
 		}
 		int indexCloseParen = s.indexOf(")");
